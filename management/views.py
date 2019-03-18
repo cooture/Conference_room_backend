@@ -209,7 +209,7 @@ class user_func(View):
         if requsest.method == 'POST':
             if 'key' and 'uid' in requsest.POST.keys():
                 if requsest.POST['key'] in method_key:
-                    post_data: dict
+
                     post_data = requsest.POST
                     try:
                         get_user = user.objects.get(id=post_data['uid'])
