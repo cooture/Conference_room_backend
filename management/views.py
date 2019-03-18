@@ -144,7 +144,7 @@ class user_func(View):
                     data['info'] = 'error key'
 
                 else:
-                    post_data: dict
+
                     post_data = request.POST
                     name = ''
                     sex = 0
