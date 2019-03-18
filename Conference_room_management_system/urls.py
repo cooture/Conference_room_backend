@@ -19,5 +19,5 @@ import management.views
 from . import version_control
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include(version_control))
+    path('/', include(version_control))
 ]
