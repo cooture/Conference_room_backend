@@ -298,6 +298,44 @@ class user_func(View):
 
         return JsonResponse(data, safe=False)
 
+    def addUsers(request):
+        data = {
+            'status': 201,
+            'info': "add users",
+            'data': []
+        }
+        if request.method == 'POST':
+            if 'key' and 'uid' and 'name' and 'sex' and 'phone' and 'email' and 'position' in request.POST.keys():
+                if request.POST['key'] in method_key:
+                    post_data = request.POST
+
+                    try:
+                        user.objects.update_or_create(id=post_data['uid'],
+                                                      defaults={'name': post_data['name'], 'sex': int(post_data['sex']),
+                                                                'phone': post_data['phone'],
+                                                                'email': post_data['email'],
+                                                                'position': post_data['position']})
+
+                        succ_add = user.objects.get(id=post_data['uid'])
+                        data['data'].append(makeUserInfo(succ_add))
+                        data['info'] = 'succeed add or update users'
+                    except Exception as e:
+                        # print(e)
+                        data['status'] = 604
+                        data['info'] = str(e)
+
+
+                else:
+                    data['status'] = 603
+                    data['info'] = 'error key'
+            else:
+                data['status'] = 602
+                data['info'] = 'error param'
+        else:
+            data['status'] = 601
+            data['info'] = 'error method'
+        return JsonResponse(data, safe=False)
+
 
 class room_func(View):
     def test(request):
@@ -349,13 +387,13 @@ class room_func(View):
             if 'key' in requset.POST.keys():
                 if requset.POST['key'] in method_key:
                     post_data = requset.POST
-                    id = ''
+
                     name = ''
                     location = ''
                     type = ''
                     manager = ''
-                    if 'rid' in post_data.keys():
-                        id = post_data['rid']
+                    # if 'rid' in post_data.keys():
+                    #     id = post_data['rid']
                     if 'name' in post_data.keys():
                         name = post_data['name']
                     if 'location' in post_data.keys():
@@ -364,14 +402,14 @@ class room_func(View):
                         type = post_data['type']
                     if 'manager' in post_data.keys():
                         manager = post_data['manager']
-
-                    """
-                    room_data = {'room_id': i_room.id, 'name': i_room.name, 'location': i_room.location,
-                                 'type': i_room.type,
-                                 'comment': i_room.comment, 'manager_id': i_room.manager_id,
-                                 'manager': i_room.manager.name}
-                    str =
-                    """
+                    try:
+                        search_res = room.objects.filter(name__contains=name, location__contains=location,
+                                                         type__contains=type, manager__name__contains=manager)
+                        for i_room in search_res:
+                            data['data'].append(makeRoomInfo(i_room))
+                    except Exception as e:
+                        data['status'] = 604
+                        data['info'] = str(e)
                 else:
                     data['status'] = 603
                     data['info'] = 'error key'
@@ -383,6 +421,45 @@ class room_func(View):
             data['info'] = 'error method'
 
         return JsonResponse(data, safe=False)
+
+    def addRooms(request):
+        data = {
+            'status': 210,
+            'info': 'add rooms',
+            'data': []
+        }
+        if request.method == 'POST':
+            if 'key' and 'rid' and 'name' and 'type' and 'location' and 'manager_id' in request.POST.keys():
+                if request.POST['key'] in method_key:
+                    post_data = request.POST
+
+                    try:
+                        room.objects.update_or_create(id=post_data['rid'],
+                                                      defaults={'name': post_data['name'], 'type': post_data['type'],
+                                                                'location': post_data['location'],
+                                                                'manager_id': post_data['manager_id']})
+
+
+                        succ_add = room.objects.get(id=post_data['rid'])
+                        data['data'].append(makeRoomInfo(succ_add))
+                        data['info'] = 'succeed add or update rooms'
+                    except Exception as e:
+                        # print(e)
+                        data['status'] = 604
+                        data['info'] = str(e)
+
+
+                else:
+                    data['status'] = 603
+                    data['info'] = 'error key'
+            else:
+                data['status'] = 602
+                data['info'] = 'error param'
+        else:
+            data['status'] = 601
+            data['info'] = 'error method'
+        return JsonResponse(data, safe=False)
+
 
 
 class web(View):

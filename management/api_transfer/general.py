@@ -8,9 +8,11 @@ urlpatterns = [
     path('searchsomebody/', user_func.searchSomebody),
     path('updateuser/', user_func.updateSomeone),
     path('getusermeeting/', user_func.getUserMeeting),
+    path('addupdateusers/', user_func.addUsers),
 
     path('getallrooms/', room_func.getAllRoom),
-    path('searchrooms/', room_func.searchRoom)
+    path('searchrooms/', room_func.searchRoom),
+    path('addupdaterooms/', room_func.addRooms),
 
 
 ]
