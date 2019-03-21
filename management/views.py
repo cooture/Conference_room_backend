@@ -140,7 +140,7 @@ class user_func(View):
         if request.method == 'POST':
             if 'key' in request.POST.keys():
                 if request.POST['key'] not in method_key:
-                    data['status'] = 602
+                    data['status'] = 603
                     data['info'] = 'error key'
 
                 else:
@@ -178,11 +178,13 @@ class user_func(View):
                         data['info'] = 'search somebody'
                         pass
                     except Exception as e:
-                        print(e)
+                        # print(e)
+                        data['status'] = 604
+                        data['info'] = str(e)
 
             else:
                 data['status'] = 602
-                data['info'] = 'error key'
+                data['info'] = 'error param'
 
         else:
             data['status'] = 601
@@ -439,7 +441,6 @@ class room_func(View):
                                                                 'location': post_data['location'],
                                                                 'manager_id': post_data['manager_id']})
 
-
                         succ_add = room.objects.get(id=post_data['rid'])
                         data['data'].append(makeRoomInfo(succ_add))
                         data['info'] = 'succeed add or update rooms'
@@ -460,6 +461,35 @@ class room_func(View):
             data['info'] = 'error method'
         return JsonResponse(data, safe=False)
 
+    def getRoomMeeting(request):
+        data = {
+            'status': 210,
+            'info': 'get rooms meeting info',
+            'data': []
+
+        }
+        if request.method == 'POST':
+            if 'key' and 'rid' in request.POST.keys():
+                if request.POST['key'] in method_key:
+                    post_data = request.POST
+                    try:
+                        search = room.objects.get(id=post_data['rid']).meeting_set.all().order_by('-starttime')
+                        for i_meeting in search:
+                            data['data'].append(makeMeetingInfo(i_meeting))
+                        data['info'] = 'succeed search'
+                    except Exception as e:
+                        data['status'] = 604
+                        data['info'] = str(e)
+                else:
+                    data['status'] = 603
+                    data['info'] = 'error key'
+            else:
+                data['info'] = 'error param'
+                data['status'] = 602
+        else:
+            data['status'] = 601
+            data['info'] = 'error method'
+        return JsonResponse(data, safe=False)
 
 
 class web(View):

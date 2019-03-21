@@ -13,6 +13,7 @@ urlpatterns = [
     path('getallrooms/', room_func.getAllRoom),
     path('searchrooms/', room_func.searchRoom),
     path('addupdaterooms/', room_func.addRooms),
+    path('getroommeeting/', room_func.getRoomMeeting),
 
 
 ]
