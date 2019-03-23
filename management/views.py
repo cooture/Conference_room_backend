@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
+from django.test import ignore_warnings
+from django.utils.datetime_safe import datetime
 from django.views.generic import View
 
-from .models import user, meeting, room
+from .models import user, meeting, room, meeting_user_rel
 
 # Create your views here.
 
@@ -17,7 +19,8 @@ def makeUserInfo(i_users):
 
 
 def makeMeetingInfo(i_meeting):
-    meeting_data = {'theme': i_meeting.theme, 'comment': i_meeting.comment, 'start_time': i_meeting.starttime,
+    meeting_data = {'id': i_meeting.id, 'theme': i_meeting.theme, 'comment': i_meeting.comment,
+                    'start_time': i_meeting.starttime,
                     'end_time': i_meeting.endtime, 'creat_person': i_meeting.creat_person.name,
                     'creat_person_id': i_meeting.creat_person.id, 'room_name': i_meeting.room.name,
                     'room_name_id': i_meeting.room.id}
@@ -28,6 +31,11 @@ def makeRoomInfo(i_room):
     room_data = {'room_id': i_room.id, 'name': i_room.name, 'location': i_room.location, 'type': i_room.type,
                  'comment': i_room.comment, 'manager_id': i_room.manager_id, 'manager': i_room.manager.name}
     return room_data
+
+
+def makeMeetingPersonRela(i):
+    return {'user_id': i.user.id, 'user_name': i.user.name, 'meeting_id': i.meeting.id,
+            'meeting_theme': i.meeting.theme, 'check': i.check}
 
 
 class user_func(View):
@@ -78,7 +86,7 @@ class user_func(View):
     def getSomeone(request):
         """
         :method:post
-        :param:key, sid
+        :param:key, uid
         :url:/gen/getsomeone
         :return: json
         :errcode_601: 非法请求
@@ -96,7 +104,7 @@ class user_func(View):
             request_data = request.POST
             try:
                 key = request_data['key']
-                sid = request_data['sid']
+                sid = request_data['uid']
                 if key not in method_key:
                     data['status'] = 604
                     data['info'] = "error key"
@@ -375,7 +383,7 @@ class room_func(View):
 
         return JsonResponse(data, safe=False)
 
-    def searchRoom(requset):
+    def searchRoom(request):
         """
 
         :return:
@@ -385,10 +393,10 @@ class room_func(View):
             'info': 'search rooms',
             'data': []
         }
-        if requset.method == 'POST':
-            if 'key' in requset.POST.keys():
-                if requset.POST['key'] in method_key:
-                    post_data = requset.POST
+        if request.method == 'POST':
+            if 'key' in request.POST.keys():
+                if request.POST['key'] in method_key:
+                    post_data = request.POST
 
                     name = ''
                     location = ''
@@ -436,10 +444,20 @@ class room_func(View):
                     post_data = request.POST
 
                     try:
-                        room.objects.update_or_create(id=post_data['rid'],
-                                                      defaults={'name': post_data['name'], 'type': post_data['type'],
-                                                                'location': post_data['location'],
-                                                                'manager_id': post_data['manager_id']})
+                        if 'comment' in post_data.keys():
+                            room.objects.update_or_create(id=post_data['rid'],
+                                                          defaults={'name': post_data['name'],
+                                                                    'type': post_data['type'],
+                                                                    'location': post_data['location'],
+                                                                    'manager_id': post_data['manager_id'],
+                                                                    'comment': post_data['comment']})
+
+                        else:
+                            room.objects.update_or_create(id=post_data['rid'],
+                                                          defaults={'name': post_data['name'],
+                                                                    'type': post_data['type'],
+                                                                    'location': post_data['location'],
+                                                                    'manager_id': post_data['manager_id']})
 
                         succ_add = room.objects.get(id=post_data['rid'])
                         data['data'].append(makeRoomInfo(succ_add))
@@ -490,6 +508,240 @@ class room_func(View):
             data['status'] = 601
             data['info'] = 'error method'
         return JsonResponse(data, safe=False)
+
+    def getroom(request):
+        data = {
+            'status': 210,
+            'info': "get all meeting",
+            'data': [],
+        }
+        if request.method == 'POST':
+            if 'key' and 'rid' in request.POST.keys():
+                if request.POST['key'] in method_key:
+                    try:
+                        search = room.objects.get(id=request.POST['rid'])
+
+                        data['data'].append(makeRoomInfo(search))
+                    except Exception as e:
+                        data['status'] = 604
+                        data['info'] = str(e)
+                else:
+                    data['info'] = 'error key'
+                    data['status'] = 603
+            else:
+                data['status'] = 602
+                data['info'] = 'error param'
+        else:
+            data['status'] = 601
+            data['info'] = 'error method'
+
+        return JsonResponse(data, safe=False)
+
+
+class meeting_func(View):
+    def getallmeeting(request):
+        data = {
+            'status': 210,
+            'info': "get all meeting",
+            'data': [],
+        }
+        if request.method == 'POST':
+            if 'key' in request.POST.keys():
+                if request.POST['key'] in method_key:
+                    try:
+                        search = meeting.objects.all().order_by('-starttime')
+                        for i_meeting in search:
+                            data['data'].append(makeMeetingInfo(i_meeting))
+                    except Exception as e:
+                        data['status'] = 604
+                        data['info'] = str(e)
+                else:
+                    data['info'] = 'error key'
+                    data['status'] = 603
+            else:
+                data['status'] = 602
+                data['info'] = 'error param'
+        else:
+            data['status'] = 601
+            data['info'] = 'error method'
+
+        return JsonResponse(data, safe=False)
+
+    def getmeeting(request):
+        data = {
+            'status': 210,
+            'info': "get all meeting",
+            'data': [],
+        }
+        if request.method == 'POST':
+            if 'key' and 'mid' in request.POST.keys():
+                if request.POST['key'] in method_key:
+                    try:
+                        search = meeting.objects.get(id=request.POST['mid'])
+
+                        data['data'].append(makeMeetingInfo(search))
+                    except Exception as e:
+                        data['status'] = 604
+                        data['info'] = str(e)
+                else:
+                    data['info'] = 'error key'
+                    data['status'] = 603
+            else:
+                data['status'] = 602
+                data['info'] = 'error param'
+        else:
+            data['status'] = 601
+            data['info'] = 'error method'
+
+        return JsonResponse(data, safe=False)
+
+    # def searchmeetings(request):
+    #     data = {
+    #         'status': 210,
+    #         'info': 'search meetings',
+    #         'data': []
+    #     }
+    #     if request.method == 'POST':
+    #         if 'key' in request.POST.keys():
+    #             if request.POST['key'] in method_key:
+    #                 post_data = request.POST
+    #                 theme = ""
+    #                 creat_person = ""
+
+    #
+    #             name = ''
+    #             location = ''
+    #             type = ''
+    #             manager = ''
+    #             # if 'rid' in post_data.keys():
+    #             #     id = post_data['rid']
+    #             if 'name' in post_data.keys():
+    #                 name = post_data['name']
+    #             if 'location' in post_data.keys():
+    #                 location = post_data['location']
+    #             if 'type' in post_data.keys():
+    #                 type = post_data['type']
+    #             if 'manager' in post_data.keys():
+    #                 manager = post_data['manager']
+    #             try:
+    # search_res = meeting.objects.filter(starttime__lte=datetime(2019, 3, 22, 23, 20, 2))# 早于该时间的
+    # search_res = meeting.objects.filter(starttime__gte='2019-03-22 23:50:51')# 晚于该时间的
+
+    #             except Exception as e:
+    #                 data['status'] = 604
+    #                 data['info'] = str(e)
+    #         else:
+    #             data['status'] = 603
+    #             data['info'] = 'error key'
+    #     else:
+    #         data['status'] = 602
+    #         data['info'] = 'error parma'
+    # else:
+    #     data['status'] = 601
+    #     data['info'] = 'error method'
+    #
+    # return JsonResponse(data, safe=False)
+
+    def getmeetingperson(request):
+        data = {
+            'status': 210,
+            'info': 'get meeting person',
+            'data': []
+        }
+        if request.method == 'POST':
+            if 'key' and 'mid' in request.POST.keys():
+                if request.POST['key'] in method_key:
+                    mid = request.POST['mid']
+                    try:
+                        search = meeting.objects.get(id=mid).meeting_user_rel_set.all()
+                        for i_search in search:
+                            data['data'].append(makeMeetingPersonRela(i_search))
+                    except Exception as e:
+                        data['info'] = str(e)
+                        data['status'] = 604
+                else:
+                    data['status'] = 603
+                    data['info'] = 'error key'
+            else:
+                data['status'] = 602
+                data['info'] = 'error parma'
+        else:
+            data['status'] = 601
+            data['info'] = 'error method'
+
+        return JsonResponse(data, safe=False)
+
+    def addUserMeeting(request):
+        data = {
+            'status': 210,
+            'info': 'add user meeting',
+            'data': []
+        }
+        if request.method == 'POST':
+            if 'key' and 'mid' and 'uid' in request.POST.keys():
+                if request.POST['key'] in method_key:
+                    mid = request.POST['mid']
+                    try:
+                        mid = request.POST['mid']
+                        uid = request.POST['uid']
+                        meeting_user_rel(user_id=uid, meeting_id=mid).save()
+                        res = meeting.objects.get(id=mid).meeting_user_rel_set.get(user_id=uid)
+                        data['data'].append(makeMeetingPersonRela(res))
+                    except Exception as e:
+                        data['info'] = str(e)
+                        data['status'] = 604
+                else:
+                    data['status'] = 603
+                    data['info'] = 'error key'
+            else:
+                data['status'] = 602
+                data['info'] = 'error parma'
+        else:
+            data['status'] = 601
+            data['info'] = 'error method'
+
+        return JsonResponse(data, safe=False)
+
+    def checkin(request):
+        data = {
+            'status': 210,
+            'info': 'add user meeting',
+            'data': []
+        }
+        if request.method == 'POST':
+            if 'key' and 'mid' and 'uid' in request.POST.keys():
+                if request.POST['key'] in method_key:
+                    mid = request.POST['mid']
+                    try:
+                        mid = request.POST['mid']
+                        uid = request.POST['uid']
+                        res = meeting.objects.get(id=mid).meeting_user_rel_set.get(user_id=uid)
+                        if 'check' in request.POST.keys():
+                            if request.POST['check'] == '0':
+                                res.check = False
+                            else:
+                                res.check = True
+                        else:
+                            res.check = True
+                        res.save()
+
+                        data['data'].append(makeMeetingPersonRela(res))
+                    except Exception as e:
+                        data['info'] = str(e)
+                        data['status'] = 604
+                else:
+                    data['status'] = 603
+                    data['info'] = 'error key'
+            else:
+                data['status'] = 602
+                data['info'] = 'error parma'
+        else:
+            data['status'] = 601
+            data['info'] = 'error method'
+
+        return JsonResponse(data, safe=False)
+
+
 
 
 class web(View):

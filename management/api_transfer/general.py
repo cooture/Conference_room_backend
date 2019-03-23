@@ -1,5 +1,5 @@
 from django.urls import path
-from management.views import user_func, room_func
+from management.views import user_func, room_func, meeting_func
 
 urlpatterns = [
     path('test/', user_func.test),
@@ -13,7 +13,13 @@ urlpatterns = [
     path('getallrooms/', room_func.getAllRoom),
     path('searchrooms/', room_func.searchRoom),
     path('addupdaterooms/', room_func.addRooms),
+    path('getroom/', room_func.getroom),
     path('getroommeeting/', room_func.getRoomMeeting),
 
-
+    path('getallmeeting/', meeting_func.getallmeeting),
+    path('getmeeting/', meeting_func.getmeeting),
+    # path('searchmeetings/', meeting_func.searchmeetings)
+    path('getmeetingperson/', meeting_func.getmeetingperson),
+    path('addusermeeting/', meeting_func.addUserMeeting),
+    path('usermeetingcheckin/', meeting_func.checkin)
 ]
