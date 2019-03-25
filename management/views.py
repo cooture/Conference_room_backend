@@ -38,6 +38,20 @@ def makeMeetingPersonRela(i):
             'meeting_theme': i.meeting.theme, 'check': i.check}
 
 
+def getTimeFromStr(str):
+    getdate = str.split()[0].split('-')
+    gettime = str.split()[1].split(':')
+    year = int(getdate[0])
+    month = int(getdate[1])
+    day = int(getdate[2])
+    hour = int(gettime[0])
+    min = int(gettime[1])
+    sec = int(gettime[2])
+    # datetime.datetime(2019, 3, 22, 23, 51, 51)
+    # return year, month, day, hour, min, sec
+    return datetime(year, month, day, hour, min, sec)
+
+
 class user_func(View):
     def test(request):
         """
@@ -537,6 +551,52 @@ class room_func(View):
 
         return JsonResponse(data, safe=False)
 
+    def checkroomtimes(request):
+        data = {
+            'status': 210,
+            'info': 'check room\'s time',
+            'data': []
+        }
+        if request.method == 'POST':
+            if 'key' and 'endtime' and 'rid' and 'starttime' in request.POST.keys():
+                if request.POST['key'] in method_key:
+
+                    try:
+                        rid = request.POST['rid']
+                        start = getTimeFromStr(request.POST['starttime'])
+                        end = getTimeFromStr(request.POST['endtime'])
+                        res = room.objects.get(id=rid).meeting_set.all()
+                        flag = True
+
+                        if start < end:
+
+                            for i_meeting in res:
+                                if (start < i_meeting.starttime and end > i_meeting.starttime) or (
+                                        start > i_meeting.starttime and end < i_meeting.endtime) or (
+                                        start < i_meeting.endtime and end > i_meeting.endtime):
+                                    flag = False
+
+                            data['data'].append(flag)
+                        else:
+                            data['status'] = 605
+                            data['info'] = 'error time param'
+
+
+                    except Exception as e:
+                        data['info'] = str(e)
+                        data['status'] = 604
+                else:
+                    data['status'] = 603
+                    data['info'] = 'error key'
+            else:
+                data['status'] = 602
+                data['info'] = 'error parma'
+        else:
+            data['status'] = 601
+            data['info'] = 'error method'
+
+        return JsonResponse(data, safe=False)
+
 
 class meeting_func(View):
     def getallmeeting(request):
@@ -741,7 +801,64 @@ class meeting_func(View):
 
         return JsonResponse(data, safe=False)
 
+    def addmeeting(request):
+        data = {
+            'status': 210,
+            'info': 'add user meeting',
+            'data': []
+        }
+        if request.method == 'POST':
+            if 'key' and 'uid' and 'starttime' and 'endtime' and 'theme' and 'rid' in request.POST.keys():
+                if request.POST['key'] in method_key:
+                    try:
+                        uid = request.POST['uid']
+                        starttime = getTimeFromStr(request.POST['starttime'])
+                        endtime = getTimeFromStr(request.POST['endtime'])
+                        theme = request.POST['theme']
+                        rid = request.POST['rid']
 
+                        res = room.objects.get(id=rid).meeting_set.exclude(theme=theme).all()
+                        flag = True
+                        if starttime < endtime:
+
+                            for i_meeting in res:
+                                if (starttime < i_meeting.starttime and endtime > i_meeting.starttime) or (
+                                        starttime > i_meeting.starttime and endtime < i_meeting.endtime) or (
+                                        starttime < i_meeting.endtime and endtime > i_meeting.endtime):
+                                    flag = False
+
+                        if flag:
+
+                            if 'comment' in request.POST.keys():
+                                meeting.objects.update_or_create(theme=theme,
+                                                                 defaults={'starttime': starttime, 'endtime': endtime,
+                                                                           'room_id': rid,
+                                                                           'comment': request.POST['comment']})
+                            else:
+                                meeting.objects.update_or_create(theme=theme,
+                                                                 defaults={'starttime': starttime, 'endtime': endtime,
+                                                                           'room_id': rid})
+
+                            res = meeting.objects.get(theme=theme)
+                            data['data'].append(makeMeetingInfo(res))
+                        else:
+                            data['status'] = 605
+                            data['info'] = 'error date param'
+
+                    except Exception as e:
+                        data['info'] = str(e)
+                        data['status'] = 604
+                else:
+                    data['status'] = 603
+                    data['info'] = 'error key'
+            else:
+                data['status'] = 602
+                data['info'] = 'error parma'
+        else:
+            data['status'] = 601
+            data['info'] = 'error method'
+
+        return JsonResponse(data, safe=False)
 
 
 class web(View):

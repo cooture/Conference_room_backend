@@ -15,11 +15,13 @@ urlpatterns = [
     path('addupdaterooms/', room_func.addRooms),
     path('getroom/', room_func.getroom),
     path('getroommeeting/', room_func.getRoomMeeting),
+    path('checkroomtimes/', room_func.checkroomtimes),
 
     path('getallmeeting/', meeting_func.getallmeeting),
     path('getmeeting/', meeting_func.getmeeting),
     # path('searchmeetings/', meeting_func.searchmeetings)
     path('getmeetingperson/', meeting_func.getmeetingperson),
     path('addusermeeting/', meeting_func.addUserMeeting),
-    path('usermeetingcheckin/', meeting_func.checkin)
+    path('usermeetingcheckin/', meeting_func.checkin),
+    path('addmeeting/', meeting_func.addmeeting)
 ]
