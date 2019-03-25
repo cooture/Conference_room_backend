@@ -833,11 +833,12 @@ class meeting_func(View):
                                 meeting.objects.update_or_create(theme=theme,
                                                                  defaults={'starttime': starttime, 'endtime': endtime,
                                                                            'room_id': rid,
-                                                                           'comment': request.POST['comment']})
+                                                                           'comment': request.POST['comment'],
+                                                                           'creat_person_id': uid})
                             else:
                                 meeting.objects.update_or_create(theme=theme,
                                                                  defaults={'starttime': starttime, 'endtime': endtime,
-                                                                           'room_id': rid})
+                                                                           'room_id': rid, 'creat_person_id': uid})
 
                             res = meeting.objects.get(theme=theme)
                             data['data'].append(makeMeetingInfo(res))
@@ -863,6 +864,8 @@ class meeting_func(View):
 
 class web(View):
     def test(requset):
+        a = meeting.objects.exclude(theme="asdasdas").all()
+        print(a)
         return HttpResponse("This is web test", status=202)
 
     def is_online(request):
