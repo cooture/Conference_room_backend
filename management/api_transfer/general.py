@@ -9,6 +9,7 @@ urlpatterns = [
     path('updateuser/', user_func.updateSomeone),
     path('getusermeeting/', user_func.getUserMeeting),
     path('addupdateusers/', user_func.addUsers),
+    path('logincheck/', user_func.loginCheck),
 
     path('getallrooms/', room_func.getAllRoom),
     path('searchrooms/', room_func.searchRoom),
@@ -16,6 +17,7 @@ urlpatterns = [
     path('getroom/', room_func.getroom),
     path('getroommeeting/', room_func.getRoomMeeting),
     path('checkroomtimes/', room_func.checkroomtimes),
+    path('nowempty/', room_func.nowempty),
 
     path('getallmeeting/', meeting_func.getallmeeting),
     path('getmeeting/', meeting_func.getmeeting),

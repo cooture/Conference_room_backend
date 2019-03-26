@@ -13,6 +13,7 @@ class user(models.Model):
     position = models.CharField(max_length=50, null=False, blank=False)
     addtime = models.DateTimeField(auto_now_add=True)
     edittime = models.DateTimeField(auto_now=True)
+    passwd = models.CharField(max_length=200, null=False, default="123456")
 
     def __str__(self):
         return self.name

@@ -62,6 +62,37 @@ class user_func(View):
         """
         return HttpResponse("This is gen test", status=202)
 
+    def loginCheck(request):
+        data = {
+            'status': 210,
+            'info': 'checklogin',
+
+            'data': []
+        }
+        if request.method == 'POST':
+            if 'key' and 'email' and 'passwd' in request.POST.keys():
+                if request.POST['key'] in method_key:
+                    try:
+                        use = user.objects.get(email=request.POST['email'])
+                        if request.POST['passwd'] == use.passwd:
+                            data['data'].append(True)
+                        else:
+                            data['data'].append(False)
+                    except Exception as e:
+                        data['status'] = 604
+                        data['info'] = str(e)
+                else:
+                    data['status'] = 603
+                    data['info'] = 'error key'
+            else:
+                data['status'] = 602
+                data['info'] = 'error param'
+        else:
+            data['status'] = 601
+            data['info'] = 'error method'
+
+        return JsonResponse(data, safe=False)
+
     def getAllUsers(request):
         """
         :comment:get all users
@@ -597,6 +628,45 @@ class room_func(View):
 
         return JsonResponse(data, safe=False)
 
+    def nowempty(request):
+        data = {
+            'status': 210,
+            'info': 'now empty',
+            'data': []
+        }
+        if request.method == 'POST':
+            if 'key' in request.POST.keys():
+                if request.POST['key'] in method_key:
+
+                    try:
+                        now = datetime.now()
+
+                        res = room.objects.all()
+
+                        for i_res in res:
+                            res_me = i_res.meeting_set.all()
+                            flag = True
+                            for j in res_me:
+                                if (now > j.starttime and now < j.endtime):
+                                    flag = False
+                            if flag: data['data'].append(makeRoomInfo(i_res))
+
+
+                    except Exception as e:
+                        data['info'] = str(e)
+                        data['status'] = 604
+                else:
+                    data['status'] = 603
+                    data['info'] = 'error key'
+            else:
+                data['status'] = 602
+                data['info'] = 'error parma'
+        else:
+            data['status'] = 601
+            data['info'] = 'error method'
+
+        return JsonResponse(data, safe=False)
+
 
 class meeting_func(View):
     def getallmeeting(request):
@@ -846,6 +916,45 @@ class meeting_func(View):
                             data['status'] = 605
                             data['info'] = 'error date param'
 
+                    except Exception as e:
+                        data['info'] = str(e)
+                        data['status'] = 604
+                else:
+                    data['status'] = 603
+                    data['info'] = 'error key'
+            else:
+                data['status'] = 602
+                data['info'] = 'error parma'
+        else:
+            data['status'] = 601
+            data['info'] = 'error method'
+
+        return JsonResponse(data, safe=False)
+
+    def addmeetingusers(request):
+        data = {
+            'status': 210,
+            'info': 'add user meeting',
+            'data': []
+        }
+        if request.method == 'POST':
+            if 'key' and 'mid' and 'uid' in request.POST.keys():
+                if request.POST['key'] in method_key:
+                    mid = request.POST['mid']
+                    try:
+                        mid = request.POST['mid']
+                        uid = request.POST['uid'].split()
+                        res = meeting.objects.get(id=mid).meeting_user_rel_set.get(user_id=uid)
+                        if 'check' in request.POST.keys():
+                            if request.POST['check'] == '0':
+                                res.check = False
+                            else:
+                                res.check = True
+                        else:
+                            res.check = True
+                        res.save()
+
+                        data['data'].append(makeMeetingPersonRela(res))
                     except Exception as e:
                         data['info'] = str(e)
                         data['status'] = 604
