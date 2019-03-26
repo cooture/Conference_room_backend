@@ -921,22 +921,23 @@ class meeting_func(View):
             'data': []
         }
         if request.method == 'POST':
-            if 'key' and 'uid' and 'starttime' and 'endtime' and 'theme' and 'rid' in request.POST.keys():
+            if 'key' and 'uid' and 'starttime' and 'endtime' and 'theme' and 'room' in request.POST.keys():
                 if request.POST['key'] in method_key:
                     try:
                         uid = request.POST['uid']
                         starttime = getTimeFromStr(request.POST['starttime'])
                         endtime = getTimeFromStr(request.POST['endtime'])
                         theme = request.POST['theme']
-                        rid = request.POST['rid']
+                        room_name = request.POST['room']
+                        getroomid = room.objects.get(name=room_name).id
 
-                        res = room.objects.get(id=rid).meeting_set.exclude(theme=theme).all()
+                        res = room.objects.get(name=room_name).meeting_set.exclude(theme=theme).all()
                         flag = True
                         if starttime < endtime:
 
                             for i_meeting in res:
                                 if (starttime < i_meeting.starttime and endtime > i_meeting.starttime) or (
-                                        starttime > i_meeting.starttime and endtime < i_meeting.endtime) or (
+                                        starttime >= i_meeting.starttime and endtime <= i_meeting.endtime) or (
                                         starttime < i_meeting.endtime and endtime > i_meeting.endtime):
                                     flag = False
 
@@ -945,13 +946,13 @@ class meeting_func(View):
                             if 'comment' in request.POST.keys():
                                 meeting.objects.update_or_create(theme=theme,
                                                                  defaults={'starttime': starttime, 'endtime': endtime,
-                                                                           'room_id': rid,
+                                                                           'room_id': getroomid,
                                                                            'comment': request.POST['comment'],
                                                                            'creat_person_id': uid})
                             else:
                                 meeting.objects.update_or_create(theme=theme,
                                                                  defaults={'starttime': starttime, 'endtime': endtime,
-                                                                           'room_id': rid, 'creat_person_id': uid})
+                                                                           'room_id': getroomid, 'creat_person_id': uid})
 
                             res = meeting.objects.get(theme=theme)
                             data['data'].append(makeMeetingInfo(res))
