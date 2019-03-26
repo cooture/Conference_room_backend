@@ -18,6 +18,7 @@ urlpatterns = [
     path('getroommeeting/', room_func.getRoomMeeting),
     path('checkroomtimes/', room_func.checkroomtimes),
     path('nowempty/', room_func.nowempty),
+    path('sometimeempty/', room_func.sometimeEmpty),
 
     path('getallmeeting/', meeting_func.getallmeeting),
     path('getmeeting/', meeting_func.getmeeting),

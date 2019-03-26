@@ -667,6 +667,49 @@ class room_func(View):
 
         return JsonResponse(data, safe=False)
 
+    def sometimeEmpty(request):
+        data = {
+            'status': 210,
+            'info': 'sometimes empty',
+            'data': []
+        }
+        if request.method == 'POST':
+            if 'key' and 'starttime' and 'endtime' in request.POST.keys():
+                if request.POST['key'] in method_key:
+
+                    try:
+
+                        start = getTimeFromStr(request.POST['starttime'])
+                        end = getTimeFromStr(request.POST['endtime'])
+
+                        res = room.objects.all()
+
+                        for i_res in res:
+                            res_me = i_res.meeting_set.all()
+                            flag = True
+                            for j in res_me:
+                                if (start < j.starttime and end > j.starttime) or (
+                                        start > j.starttime and end < j.endtime) or (
+                                        start < j.endtime and end > j.endtime):
+                                    flag = False
+                            if flag: data['data'].append(makeRoomInfo(i_res))
+
+
+                    except Exception as e:
+                        data['info'] = str(e)
+                        data['status'] = 604
+                else:
+                    data['status'] = 603
+                    data['info'] = 'error key'
+            else:
+                data['status'] = 602
+                data['info'] = 'error parma'
+        else:
+            data['status'] = 601
+            data['info'] = 'error method'
+
+        return JsonResponse(data, safe=False)
+
 
 class meeting_func(View):
     def getallmeeting(request):
