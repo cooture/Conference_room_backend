@@ -990,6 +990,7 @@ class meeting_func(View):
                                                                            'creat_person_id': uid})
 
                             res = meeting.objects.get(theme=theme)
+                            meeting_user_rel.objects.update_or_create(user_id=uid, meeting_id=res.id)
                             data['data'].append(makeMeetingInfo(res))
                         else:
                             data['status'] = 605

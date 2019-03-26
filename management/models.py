@@ -31,7 +31,7 @@ class room(models.Model):
     comment = models.TextField(max_length=500, default="备注为空", null=True, blank=True)
     addtime = models.DateTimeField(auto_now_add=True)
     edittime = models.DateTimeField(auto_now=True)
-    manager = models.ForeignKey(user, on_delete=models.SET_NULL, null=True, blank=True)
+    manager = models.ForeignKey(user, on_delete=models.SET_DEFAULT, null=False, default='null')
 
     def __str__(self):
         return self.name
