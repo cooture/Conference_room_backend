@@ -100,7 +100,7 @@ class user_func(View):
     def getFaceLibList(request):
         data = {
             'status': 210,
-            'info': 'checklogin',
+            'info': 'get face list',
 
             'data': []
         }
