@@ -26,10 +26,11 @@ class roomadmin(admin.ModelAdmin):
     inlines = [meeting_rel]
     list_display = ('name', 'location', 'type', 'manager', 'comment')
 
+
 admin.sites.AdminSite.site_title = "智能会议室后台"
 admin.sites.AdminSite.site_header = "智能会议室后台"
 admin.sites.AdminSite.index_title = "智能会议室后台"
 admin.site.register(models.user, useradmin)
 admin.site.register(models.room, roomadmin)
 admin.site.register(models.meeting, meetingadmin)
-admin.site.register(models.meeting_user_rel)
+# admin.site.register(models.meeting_user_rel)
