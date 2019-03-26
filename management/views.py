@@ -360,7 +360,7 @@ class user_func(View):
             'data': []
         }
         if request.method == 'POST':
-            if 'key' and 'uid' and 'name' and 'sex' and 'phone' and 'email' and 'position' in request.POST.keys():
+            if 'key' and 'uid' and 'name' and 'sex' and 'phone' and 'email' and 'position' and 'passws'in request.POST.keys():
                 if request.POST['key'] in method_key:
                     post_data = request.POST
 
@@ -369,7 +369,7 @@ class user_func(View):
                                                       defaults={'name': post_data['name'], 'sex': int(post_data['sex']),
                                                                 'phone': post_data['phone'],
                                                                 'email': post_data['email'],
-                                                                'position': post_data['position']})
+                                                                'position': post_data['position'], 'passwd': post_data['passwd']})
 
                         succ_add = user.objects.get(id=post_data['uid'])
                         data['data'].append(makeUserInfo(succ_add))
