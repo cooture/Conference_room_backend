@@ -10,6 +10,7 @@ urlpatterns = [
     path('getusermeeting/', user_func.getUserMeeting),
     path('addupdateusers/', user_func.addUsers),
     path('logincheck/', user_func.loginCheck),
+    path('getfaceliblist/', user_func.getFaceLibList),
 
     path('getallrooms/', room_func.getAllRoom),
     path('searchrooms/', room_func.searchRoom),

@@ -14,7 +14,7 @@ class user(models.Model):
     addtime = models.DateTimeField(auto_now_add=True)
     edittime = models.DateTimeField(auto_now=True)
     passwd = models.CharField(max_length=200, null=False, default="123456")
-    pic = models.ImageField(upload_to='facelib/', default='null')
+    pic = models.ImageField(upload_to='static/facelib', default='null')
 
     def __str__(self):
         return self.name

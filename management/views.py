@@ -33,6 +33,10 @@ def makeRoomInfo(i_room):
     return room_data
 
 
+def makeFaceInfo(i_user):
+    return {'name': i_user.name, 'id': i_user.id, 'face': i_user.pic.url}
+
+
 def makeMeetingPersonRela(i):
     return {'user_id': i.user.id, 'user_name': i.user.name, 'meeting_id': i.meeting.id,
             'meeting_theme': i.meeting.theme, 'check': i.check}
@@ -78,6 +82,35 @@ class user_func(View):
                             data['data'].append(True)
                         else:
                             data['data'].append(False)
+                    except Exception as e:
+                        data['status'] = 604
+                        data['info'] = str(e)
+                else:
+                    data['status'] = 603
+                    data['info'] = 'error key'
+            else:
+                data['status'] = 602
+                data['info'] = 'error param'
+        else:
+            data['status'] = 601
+            data['info'] = 'error method'
+
+        return JsonResponse(data, safe=False)
+
+    def getFaceLibList(request):
+        data = {
+            'status': 210,
+            'info': 'checklogin',
+
+            'data': []
+        }
+        if request.method == 'POST':
+            if 'key' in request.POST.keys():
+                if request.POST['key'] in method_key:
+                    try:
+                        res = user.objects.all()
+                        for i in res:
+                            data['data'].append(makeFaceInfo(i))
                     except Exception as e:
                         data['status'] = 604
                         data['info'] = str(e)
@@ -360,7 +393,7 @@ class user_func(View):
             'data': []
         }
         if request.method == 'POST':
-            if 'key' and 'uid' and 'name' and 'sex' and 'phone' and 'email' and 'position' and 'passws'in request.POST.keys():
+            if 'key' and 'uid' and 'name' and 'sex' and 'phone' and 'email' and 'position' and 'passws' in request.POST.keys():
                 if request.POST['key'] in method_key:
                     post_data = request.POST
 
@@ -369,7 +402,8 @@ class user_func(View):
                                                       defaults={'name': post_data['name'], 'sex': int(post_data['sex']),
                                                                 'phone': post_data['phone'],
                                                                 'email': post_data['email'],
-                                                                'position': post_data['position'], 'passwd': post_data['passwd']})
+                                                                'position': post_data['position'],
+                                                                'passwd': post_data['passwd']})
 
                         succ_add = user.objects.get(id=post_data['uid'])
                         data['data'].append(makeUserInfo(succ_add))
@@ -952,7 +986,8 @@ class meeting_func(View):
                             else:
                                 meeting.objects.update_or_create(theme=theme,
                                                                  defaults={'starttime': starttime, 'endtime': endtime,
-                                                                           'room_id': getroomid, 'creat_person_id': uid})
+                                                                           'room_id': getroomid,
+                                                                           'creat_person_id': uid})
 
                             res = meeting.objects.get(theme=theme)
                             data['data'].append(makeMeetingInfo(res))
