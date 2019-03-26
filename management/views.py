@@ -711,27 +711,29 @@ class room_func(View):
             if 'key' and 'starttime' and 'endtime' in request.POST.keys():
                 if request.POST['key'] in method_key:
 
-                    try:
+                    # try:
 
-                        start = getTimeFromStr(request.POST['starttime'])
-                        end = getTimeFromStr(request.POST['endtime'])
+                    start = getTimeFromStr(request.POST['starttime'])
+                    end = getTimeFromStr(request.POST['endtime'])
 
-                        res = room.objects.all()
+                    res = room.objects.all()
 
-                        for i_res in res:
-                            res_me = i_res.meeting_set.all()
-                            flag = True
-                            for j in res_me:
-                                if (start < j.starttime and end > j.starttime) or (
-                                        start > j.starttime and end < j.endtime) or (
-                                        start < j.endtime and end > j.endtime):
-                                    flag = False
-                            if flag: data['data'].append(makeRoomInfo(i_res))
+                    for i_res in res:
+                        res_me = i_res.meeting_set.all()
+                        flag = True
+                        for j in res_me:
+                            if (start < j.starttime and end > j.starttime) or (
+                                    start > j.starttime and end < j.endtime) or (
+                                    start < j.endtime and end > j.endtime):
+                                flag = False
+                        if flag:
+
+                            data['data'].append(makeRoomInfo(i_res))
 
 
-                    except Exception as e:
-                        data['info'] = str(e)
-                        data['status'] = 604
+                    # except Exception as e:
+                    #     data['info'] = str(e)
+                    #     data['status'] = 604
                 else:
                     data['status'] = 603
                     data['info'] = 'error key'
