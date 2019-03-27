@@ -367,7 +367,7 @@ class user_func(View):
                 if request.POST['key'] in method_key:
                     try:
                         data['user'] = makeUserInfo(user.objects.get(id=request.POST['uid']))
-                        user_metting = user.objects.get(id=request.POST['uid']).person.all()
+                        user_metting = user.objects.get(id=request.POST['uid']).person.order_by('-strattime').all()
                         for i_meeting in user_metting:
                             data['data'].append(makeMeetingInfo(i_meeting))
                             data['info'] = 'success get user meeting'
