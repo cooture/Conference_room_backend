@@ -79,9 +79,11 @@ class user_func(View):
                     try:
                         use = user.objects.get(email=request.POST['email'])
                         if request.POST['passwd'] == use.passwd:
-                            data['data'].append(True)
+                            data['data'].append(makeUserInfo(use))
+
                         else:
-                            data['data'].append(False)
+                            data['status'] = 605
+                            data['info'] = 'error passwd'
                     except Exception as e:
                         data['status'] = 604
                         data['info'] = str(e)
