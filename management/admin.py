@@ -24,7 +24,7 @@ class meetingadmin(admin.ModelAdmin):
 class roomadmin(admin.ModelAdmin):
     search_fields = ('name',)
     inlines = [meeting_rel]
-    list_display = ('name', 'location', 'type', 'manager', 'comment')
+    list_display = ('id', 'name', 'location', 'type', 'manager', 'comment')
 
 
 admin.sites.AdminSite.site_title = "智能会议室后台"
