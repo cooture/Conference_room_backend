@@ -19,7 +19,7 @@ class useradmin(admin.ModelAdmin):
 class meetingadmin(admin.ModelAdmin):
     search_fields = ('theme',)
     inlines = [rel]
-    list_display = ('theme', 'starttime', 'endtime', 'room', 'comment')
+    list_display = ('id','theme', 'starttime', 'endtime', 'room', 'comment')
 
 class roomadmin(admin.ModelAdmin):
     search_fields = ('name',)
